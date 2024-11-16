@@ -20,6 +20,8 @@ class Diary:
         else:
             return False
 
+# ini branch ke-dua
+
     def tambah_entri(self, tanggal, tema, konten):
         entri = {'tanggal': tanggal, 'tema': tema, 'konten': konten}
         self.entries.append(entri)
