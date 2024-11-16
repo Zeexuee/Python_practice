@@ -5,6 +5,7 @@ import os
 import tkinter as tk
 from tkinter import messagebox, simpledialog, scrolledtext
 from ttkthemes import ThemedTk  # Untuk menggunakan tema modern
+from PIL import Image, ImageTk  # Import dari Pillow untuk memuat gambar
 
 class Diary:
     def __init__(self, password_hash):
@@ -19,8 +20,6 @@ class Diary:
             return True
         else:
             return False
-
-# ini branch ke-dua
 
     def tambah_entri(self, tanggal, tema, konten):
         entri = {'tanggal': tanggal, 'tema': tema, 'konten': konten}
@@ -72,16 +71,26 @@ if not password_hash:
 diary = Diary(password_hash)
 diary.muat_entri()
 
-# GUI Application dengan tampilan modern
 class DiaryApp:
     def __init__(self, master):
         self.master = master
-        self.master.title("Diary Application")
-        self.master.geometry("600x400")
-        self.master.minsize(600, 400)  # Ukuran minimum jendela
-        self.master.configure(bg='#F4F4F9')  # Latar belakang warna terang
+        self.master.title("Anime Diary Application")
+        self.master.geometry("800x600")  # Ukuran jendela lebih besar
+        self.master.minsize(600, 400)
+        self.master.configure(bg='#F4F4F9')
 
         self.authenticated = False
+
+        # Menggunakan Pillow untuk memuat gambar latar belakang
+        self.bg_image = Image.open("anime_background.jpeg")  # Pastikan menggunakan format gambar yang benar
+        self.bg_image = self.bg_image.resize(
+            (self.master.winfo_width(), self.master.winfo_height()), 
+            Image.Resampling.LANCZOS  # Menggunakan LANCZOS untuk kualitas tinggi
+        )
+        self.bg_image_tk = ImageTk.PhotoImage(self.bg_image)
+
+        self.bg_label = tk.Label(self.master, image=self.bg_image_tk)
+        self.bg_label.place(relwidth=1, relheight=1)
 
         self.create_widgets()
 
@@ -94,20 +103,26 @@ class DiaryApp:
         self.text_area = scrolledtext.ScrolledText(self.main_frame, wrap=tk.WORD, width=70, height=15, font=("Helvetica", 11), bd=0, bg="#FFFFFF", fg="#333333")
         self.text_area.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
 
-        # Tombol aksi
-        self.view_button = tk.Button(self.main_frame, text="Lihat Entri", command=self.lihat_entri, font=("Helvetica", 10), bg="#5C6BC0", fg="white", relief="flat", height=2)
+        # Tombol aksi dengan animasi hover
+        self.view_button = self.create_button("Lihat Entri", self.lihat_entri, "#5C6BC0")
         self.view_button.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
 
-        self.add_button = tk.Button(self.main_frame, text="Tambah Entri", command=self.tambah_entri, font=("Helvetica", 10), bg="#81C784", fg="white", relief="flat", height=2)
+        self.add_button = self.create_button("Tambah Entri", self.tambah_entri, "#81C784")
         self.add_button.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
 
-        self.delete_button = tk.Button(self.main_frame, text="Hapus Entri", command=self.hapus_entri, font=("Helvetica", 10), bg="#E57373", fg="white", relief="flat", height=2)
+        self.delete_button = self.create_button("Hapus Entri", self.hapus_entri, "#E57373")
         self.delete_button.grid(row=1, column=2, padx=10, pady=10, sticky="ew")
 
-        self.save_button = tk.Button(self.main_frame, text="Simpan dan Keluar", command=self.simpan_keluar, font=("Helvetica", 10), bg="#4CAF50", fg="white", relief="flat", height=2)
+        self.save_button = self.create_button("Simpan dan Keluar", self.simpan_keluar, "#4CAF50")
         self.save_button.grid(row=2, column=0, columnspan=3, pady=10, sticky="ew")
 
         self.auth_dialog()  # Memulai dialog autentikasi
+
+    def create_button(self, text, command, color):
+        button = tk.Button(self.main_frame, text=text, command=command, font=("Helvetica", 10), bg=color, fg="white", relief="flat", height=2)
+        button.bind("<Enter>", lambda e: button.config(bg="#8BC34A"))  # Hover effect
+        button.bind("<Leave>", lambda e: button.config(bg=color))  # Restore button color after hover
+        return button
 
     def auth_dialog(self):
         password = simpledialog.askstring("Password", "Masukkan password untuk mengakses diary:", show="*")
